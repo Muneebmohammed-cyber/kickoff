@@ -679,7 +679,8 @@ async function loadTeams(){
   const c=store.get('teams',null);
   if(c&&Date.now()-c.at<3*864e5){TEAMS=c.list;return}
   const lgs=LEAGUES.filter(l=>!['eng.fa','fifa.friendly'].includes(l.id)).sort((a,b)=>a.id.startsWith('uefa')-b.id.startsWith('uefa')); // domestic league first
-  const res=await Promise.allSettled(lgs.map(l=>get(API+l.id+'/teams').then(j=>({lg:l.id,t:j.sports?.[0]?.leagues?.[0]?.teams||[]}))));
+  // team lists come from league tables (ESPN's /teams endpoint is blocked for browser apps)
+  const res=await Promise.allSettled(lgs.map(l=>get(API2+l.id+'/standings').then(j=>({lg:l.id,t:(j.children||[]).flatMap(g=>g.standings?.entries||[])}))));
   const seen=new Set(),list=[];
   for(const r of res)if(r.status==='fulfilled')for(const x of r.value.t){const t=x.team;if(!t||seen.has(t.id))continue;seen.add(t.id);
     list.push({id:String(t.id),name:t.displayName,short:t.shortDisplayName||t.displayName,logo:logoOf(t),lg:r.value.lg,k:fold(t.displayName+' '+(t.shortDisplayName||'')+' '+(t.abbreviation||'')+' '+(t.nickname||'')+' '+(t.location||''))})}
