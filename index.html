@@ -683,15 +683,16 @@ async function loadTeams(){
   const res=await Promise.allSettled(lgs.map(l=>get(API2+l.id+'/standings').then(j=>({lg:l.id,t:(j.children||[]).flatMap(g=>g.standings?.entries||[])}))));
   const seen=new Set(),list=[];
   for(const r of res)if(r.status==='fulfilled')for(const x of r.value.t){const t=x.team;if(!t||seen.has(t.id))continue;seen.add(t.id);
-    list.push({id:String(t.id),name:t.displayName,short:t.shortDisplayName||t.displayName,logo:logoOf(t),lg:r.value.lg,k:fold(t.displayName+' '+(t.shortDisplayName||'')+' '+(t.abbreviation||'')+' '+(t.nickname||'')+' '+(t.location||''))})}
+    list.push({id:String(t.id),name:t.displayName,short:t.shortDisplayName||t.displayName,logo:logoOf(t),lg:r.value.lg,k:fold(t.displayName.replace(/[-.]/g,' ')+' '+t.displayName+' '+(t.shortDisplayName||'')+' '+(t.abbreviation||'')+' '+(t.nickname||'')+' '+(t.location||''))})}
   if(list.length){TEAMS=list;store.set('teams2',{at:Date.now(),list})}
 }
-const fold=s=>String(s||'').normalize('NFD').replace(/[̀-ͯ]/g,'').toLowerCase();
+const fold=s=>String(s||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase();
+const NICK={barca:'barcelona',spurs:'tottenham','man utd':'manchester united','man u':'manchester united','man united':'manchester united',psg:'paris saint germain',juve:'juventus',atleti:'atletico',inter:'internazionale',bayern:'bayern munich',bvb:'dortmund',gunners:'arsenal',wolves:'wolverhampton',forest:'nottingham forest',hammers:'west ham',toffees:'everton',magpies:'newcastle',villa:'aston villa',madrid:'real madrid',ittihad:'ittihad',nassr:'nassr'};
 async function openSearch(){
   openSheet('Find a team',`<input id="q" class="search" type="search" placeholder="Search teams — e.g. Al Hilal, Barça, Spurs" autocomplete="off" enterkeyhint="search"><div id="results"><div class="spin"></div></div>`);
   const q=$('#q');q.value=S.q||'';setTimeout(()=>q.focus(),250);
   if(!TEAMS)await loadTeams();
-  const run=()=>{const v=fold(q.value.trim());const box=$('#results');if(!box)return;
+  const run=()=>{let v=fold(q.value.trim()).replace(/[-.]/g,' ');if(NICK[v])v=NICK[v];const box=$('#results');if(!box)return;
     if(!TEAMS?.length){box.innerHTML='<div class="empty">Couldn’t load teams. Check your connection.</div>';return}
     const hits=v?TEAMS.filter(t=>t.k.includes(v)).sort((a,b)=>(b.k.startsWith(v)-a.k.startsWith(v))).slice(0,40):TEAMS.filter(t=>isFav(t.id)).concat(TEAMS.filter(t=>!isFav(t.id)&&t.lg==='eng.1'));
     box.innerHTML=(v?'':'<div class="lg">Popular · or type to search '+TEAMS.length+' teams</div>')+(hits.length?hits.map(t=>`<div class="sr"><button class="row" data-team="${esc(t.id)}" data-tlg="${esc(t.lg)}"><img src="${esc(t.logo)}" alt="" loading="lazy"><div><b>${esc(t.name)}</b><div class="meta">${esc(LN[t.lg]||'')}</div></div></button><button class="star ${isFav(t.id)?'on':''}" data-star="${esc(t.id)}" aria-label="Follow ${esc(t.name)}">${isFav(t.id)?'★':'☆'}</button></div>`).join(''):'<div class="empty">No team matches that.</div>');};
