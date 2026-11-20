@@ -676,7 +676,7 @@ function squadHtml(A){
 /* ---------- SEARCH: every team in every league ---------- */
 let TEAMS=null;
 async function loadTeams(){
-  const c=store.get('teams',null);
+  const c=store.get('teams2',null);
   if(c&&Date.now()-c.at<3*864e5){TEAMS=c.list;return}
   const lgs=LEAGUES.filter(l=>!['eng.fa','fifa.friendly'].includes(l.id)).sort((a,b)=>a.id.startsWith('uefa')-b.id.startsWith('uefa')); // domestic league first
   // team lists come from league tables (ESPN's /teams endpoint is blocked for browser apps)
@@ -684,7 +684,7 @@ async function loadTeams(){
   const seen=new Set(),list=[];
   for(const r of res)if(r.status==='fulfilled')for(const x of r.value.t){const t=x.team;if(!t||seen.has(t.id))continue;seen.add(t.id);
     list.push({id:String(t.id),name:t.displayName,short:t.shortDisplayName||t.displayName,logo:logoOf(t),lg:r.value.lg,k:fold(t.displayName+' '+(t.shortDisplayName||'')+' '+(t.abbreviation||'')+' '+(t.nickname||'')+' '+(t.location||''))})}
-  if(list.length){TEAMS=list;store.set('teams',{at:Date.now(),list})}
+  if(list.length){TEAMS=list;store.set('teams2',{at:Date.now(),list})}
 }
 const fold=s=>String(s||'').normalize('NFD').replace(/[̀-ͯ]/g,'').toLowerCase();
 async function openSearch(){
