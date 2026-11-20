@@ -237,14 +237,16 @@ function matchRow(m){
 /* ---------- MATCHES ---------- */
 let MCACHE={};
 async function loadMatches(silent){
-  const d=dayOf(S.day),prev=new Date(d),next=new Date(d);prev.setDate(d.getDate()-1);next.setDate(d.getDate()+1);
-  const range=ymd(prev)+'-'+ymd(next),key=ymd(d);
+  // ESPN groups games by US date (behind Dubai), so a local day = that US day + early hours of the next
+  const d=dayOf(S.day),prev=new Date(d);prev.setDate(d.getDate()-1);
+  const key=ymd(d),days=[ymd(prev),key];
   const want=LEAGUES.map(l=>l.id);
   if(!silent)$('#view').innerHTML='<div class="spin"></div>';
-  const res=await Promise.allSettled(want.map(lg=>get(API+lg+'/scoreboard?dates='+range).then(j=>({lg,j}))));
-  const all=[];
+  const jobs=[];for(const lg of want)for(const dy of days)jobs.push(get(API+lg+'/scoreboard?dates='+dy).then(j=>({lg,j})));
+  const res=await Promise.allSettled(jobs);
+  const all=[],seen=new Set();
   for(const r of res){if(r.status!=='fulfilled')continue;
-    for(const ev of r.value.j.events||[]){const m=norm(ev,r.value.lg);if(ymd(new Date(m.date))===key)all.push(m)}}
+    for(const ev of r.value.j.events||[]){if(seen.has(ev.id))continue;seen.add(ev.id);const m=norm(ev,r.value.lg);if(ymd(new Date(m.date))===key)all.push(m)}}
   MCACHE={key,all,at:new Date()};
   checkGoals(all);
   renderMatches();
