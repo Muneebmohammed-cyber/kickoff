@@ -141,7 +141,10 @@ nav.tabs button.on{color:var(--acc)}
 .sw.on{background:var(--acc)}.sw.on::after{left:23px}
 .toast{position:fixed;left:50%;bottom:calc(76px + var(--safe-b));transform:translateX(-50%);background:var(--ink);color:var(--bg);padding:10px 16px;border-radius:12px;font-weight:600;font-size:13px;z-index:80;opacity:0;pointer-events:none;transition:opacity .2s}
 .toast.show{opacity:1}
-.upd{font-size:11px;color:var(--mute);text-align:center;margin-top:12px}
+.upd{font-size:11px;color:var(--mute);text-align:center;margin-top:12px;line-height:1.7}
+.dot{display:inline-block;width:6px;height:6px;border-radius:50%;background:#22c55e;margin-right:6px;vertical-align:1px;animation:pulse 2s infinite}
+.pill{position:fixed;top:calc(118px + var(--safe-t));left:50%;transform:translateX(-50%);z-index:25;background:var(--acc);color:var(--accInk);font-weight:700;font-size:13px;padding:10px 16px;border-radius:999px;box-shadow:0 6px 20px rgba(0,0,0,.35);min-height:40px}
+@media(prefers-reduced-motion:reduce){.dot{animation:none}}
 :focus-visible{outline:2px solid var(--acc);outline-offset:2px}
 </style>
 </head>
@@ -236,9 +239,10 @@ function matchRow(m){
 
 /* ---------- MATCHES ---------- */
 let MCACHE={};
-async function loadMatches(silent){
+async function loadMatches(silent,bg){
   // ESPN groups games by US date (behind Dubai), so a local day = that US day + early hours of the next
-  const d=dayOf(S.day),prev=new Date(d);prev.setDate(d.getDate()-1);
+  const off=bg?0:S.day;
+  const d=dayOf(off),prev=new Date(d);prev.setDate(d.getDate()-1);
   const key=ymd(d),days=[ymd(prev),key];
   const want=LEAGUES.map(l=>l.id);
   if(!silent)$('#view').innerHTML='<div class="spin"></div>';
@@ -247,10 +251,12 @@ async function loadMatches(silent){
   const all=[],seen=new Set();
   for(const r of res){if(r.status!=='fulfilled')continue;
     for(const ev of r.value.j.events||[]){if(seen.has(ev.id))continue;seen.add(ev.id);const m=norm(ev,r.value.lg);if(ymd(new Date(m.date))===key)all.push(m)}}
-  MCACHE={key,all,at:new Date()};
   checkGoals(all);
+  if(off===0)scheduleRefresh(all.some(m=>m.state==='in'));
+  if(bg&&S.day!==0)return;
+  LAST.m=Date.now();
+  MCACHE={key,all,at:new Date()};
   renderMatches();
-  scheduleRefresh(all.some(m=>m.state==='in'));
 }
 function renderMatches(){
   if(S.tab!=='matches')return;
@@ -269,13 +275,26 @@ function renderMatches(){
     if(!ms.length)continue;
     html+=`<div class="lg">${esc(L.n)}</div>`+ms.map(matchRow).join('');
   }
-  html+=`<div class="upd">Updated ${MCACHE.at.toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'})}${list.some(m=>m.state==='in')?' · live scores refresh every 30s':''}</div>`;
+  html+=`<div class="upd"><span class="dot"></span>Live · updated ${MCACHE.at.toLocaleTimeString([], {hour:'2-digit',minute:'2-digit',second:'2-digit'})} · ${list.some(m=>m.state==='in')?'scores refresh every 20s':'refreshes every minute'}</div>`;
   $('#view').innerHTML=html;
 }
-function scheduleRefresh(live){
-  clearInterval(S.timer);
-  S.timer=setInterval(()=>{if(document.hidden)return;if(S.tab==='matches')loadMatches(true)},live?30000:120000);
-}
+/* ---------- LIVE UPDATES: every screen refreshes itself in the background ---------- */
+const LAST={};let BUSY=false;
+function scheduleRefresh(live){S.anyLive=live}
+function due(k,ms){if(Date.now()-(LAST[k]||0)<ms)return false;LAST[k]=Date.now();return true}
+setInterval(async()=>{
+  if(document.hidden||BUSY||!navigator.onLine)return;
+  BUSY=true;
+  try{
+    if(S.stack.length){/* open match/team pages refresh themselves */}
+    else if(S.tab==='matches'&&due('m',S.anyLive?20000:60000))await loadMatches(true);
+    else if(S.tab==='news'&&due('n',60000))await loadNews(true);
+    else if(S.tab==='tables'&&due('t',S.anyLive?45000:120000))await loadTable(true);
+    // keep scores fresh in the background so goal alerts fire on any screen
+    if(S.tab!=='matches'&&S.favs.length&&due('bg',S.anyLive?30000:120000))await loadMatches(true,true);
+  }finally{BUSY=false}
+},5000);
+function liveStamp(){return new Date().toLocaleTimeString([], {hour:'2-digit',minute:'2-digit',second:'2-digit'})}
 function checkGoals(all){
   for(const m of all){
     const k=m.id,cur=(m.h.score||0)+'-'+(m.a.score||0),old=S.lastScores[k];
@@ -298,18 +317,36 @@ function matchesBar(){
 
 /* ---------- NEWS ---------- */
 let NEWS=[];
-async function loadNews(){
-  $('#view').innerHTML='<div class="spin"></div>';
-  const lgs=S.nLeague==='top'?NEWS_LEAGUES:[S.nLeague];
+let PENDING=null,NEWSAT=null;
+async function loadNews(silent){
+  if(!silent)$('#view').innerHTML='<div class="spin"></div>';
+  const which=S.nLeague;
+  const lgs=which==='top'?NEWS_LEAGUES:[which];
   const res=await Promise.allSettled(lgs.map(lg=>get(API+lg+'/news?limit=25').then(j=>(j.articles||[]).map(a=>({...a,_lg:lg})))));
-  const seen=new Set();NEWS=[];
-  for(const r of res)if(r.status==='fulfilled')for(const a of r.value){if(seen.has(a.id))continue;seen.add(a.id);NEWS.push(a)}
-  NEWS.sort((a,b)=>new Date(b.published)-new Date(a.published));
-  if(S.favs.length&&S.nLeague==='top'){ // lift stories about followed teams
+  if(which!==S.nLeague)return; // user switched league meanwhile
+  const seen=new Set(),list=[];
+  for(const r of res)if(r.status==='fulfilled')for(const a of r.value){if(seen.has(a.id))continue;seen.add(a.id);list.push(a)}
+  if(silent&&!list.length)return; // keep what's on screen if a refresh fails
+  list.sort((a,b)=>new Date(b.published)-new Date(a.published));
+  if(S.favs.length&&which==='top'){ // lift stories about followed teams
     const fid=new Set(S.favs.map(f=>String(f.id)));
-    NEWS.sort((a,b)=>(hasTeam(b,fid)-hasTeam(a,fid))||0);
+    list.sort((a,b)=>(hasTeam(b,fid)-hasTeam(a,fid))||0);
   }
+  LAST.n=Date.now();NEWSAT=new Date();
+  const old=new Set(NEWS.map(a=>a.id));
+  const fresh=silent?list.filter(a=>!old.has(a.id)).length:0;
+  // reading further down: don't yank the page, offer a "new stories" pill instead
+  if(silent&&fresh&&window.scrollY>200&&S.tab==='news'){PENDING=list;showPill(fresh);return}
+  NEWS=list;PENDING=null;
+  if(silent&&!fresh){const u=document.querySelector('#newsUpd');if(u){u.textContent=newsStamp();return}}
   renderNews();
+  if(fresh)toast(fresh+' new '+(fresh>1?'stories':'story'));
+}
+const newsStamp=()=>'Live · updated '+(NEWSAT||new Date()).toLocaleTimeString([], {hour:'2-digit',minute:'2-digit',second:'2-digit'})+' · checks for new stories every minute';
+function showPill(n){
+  let p=document.getElementById('pill');
+  if(!p){p=document.createElement('button');p.id='pill';p.className='pill';document.body.appendChild(p)}
+  p.textContent='↑ '+n+' new '+(n>1?'stories':'story');p.hidden=false;
 }
 const hasTeam=(a,ids)=>(a.categories||[]).some(c=>c.teamId&&ids.has(String(c.teamId)))?1:0;
 function img(a){const i=(a.images||[]).find(x=>x.type==='header')||a.images?.[0];return i?.url||''}
@@ -319,8 +356,11 @@ function renderNews(){
   const [first,...rest]=NEWS;
   let html=`<button class="hero" data-n="${esc(first.id)}"><img src="${esc(img(first))}" alt=""><div class="cap"><span class="tag" style="color:var(--acc)">${esc(LN[first._lg]||'')}</span><h2>${esc(first.headline)}</h2><div class="meta">${ago(first.published)}${first.byline?' · '+esc(first.byline):''}</div></div></button>`;
   html+=rest.slice(0,60).map(a=>`<button class="story" data-n="${esc(a.id)}"><div><span class="tag">${esc(LN[a._lg]||'')}</span><h3>${esc(a.headline)}</h3><div class="meta">${ago(a.published)}</div></div>${img(a)?`<img src="${esc(img(a))}" alt="" loading="lazy">`:'<span></span>'}</button>`).join('');
-  html+=`<div class="upd">News and photos from ESPN</div>`;
+  html+=`<div class="upd"><span class="dot"></span><span id="newsUpd">${newsStamp()}</span><br>News and photos from ESPN</div>`;
   $('#view').innerHTML=html;
+  const p=document.getElementById('pill');if(p)p.hidden=true;
+  // keep "5m ago" labels ticking
+  clearInterval(S.agoT);S.agoT=setInterval(()=>{if(S.tab!=='news')return;document.querySelectorAll('#view [data-n] .meta').forEach((el,i)=>{const a=NEWS[i];if(a)el.firstChild.nodeValue=ago(a.published)+(i===0&&a.byline?' · '+a.byline:'')})},30000);
 }
 function newsBar(){
   return `<div class="chips">${[{id:'top',n:'Top stories'},...LEAGUES.slice(0,13)].map(l=>`<button class="chip ${S.nLeague===l.id?'on':''}" data-nl="${l.id}">${esc(l.n)}</button>`).join('')}</div>`;
@@ -345,8 +385,9 @@ function sanitize(html){
 }
 
 /* ---------- TABLES ---------- */
-async function loadTable(){
-  $('#view').innerHTML='<div class="spin"></div>';
+async function loadTable(silent){
+  if(!silent)$('#view').innerHTML='<div class="spin"></div>';
+  LAST.t=Date.now();
   try{
     const j=await get(API2+S.tLeague+'/standings');
     const groups=j.children||[];
@@ -361,9 +402,9 @@ async function loadTable(){
         return `<tr class="${z} ${isFav(e.team.id)?'myteam':''}" data-team="${esc(e.team.id)}" data-tlg="${esc(S.tLeague)}" style="cursor:pointer"><td>${r}</td><td><div class="tcell"><img class="crest" src="${esc(logoOf(e.team))}" alt="" loading="lazy">${esc(e.team.shortDisplayName||e.team.displayName)}${isFav(e.team.id)?' <span style="color:var(--acc)">★</span>':''}</div></td>
         <td>${sv(e,'gamesPlayed')}</td><td class="hide-s">${sv(e,'wins')}</td><td class="hide-s">${sv(e,'ties')}</td><td class="hide-s">${sv(e,'losses')}</td><td>${sv(e,'pointDifferential')}</td><td class="pts">${sv(e,'points')}</td></tr>`}).join('')+`</tbody></table>`;
     }
-    html+=`<div class="upd">Tap a team to see fixtures, results and news</div>`;
+    html+=`<div class="upd"><span class="dot"></span>Live · updated ${liveStamp()} · moves as results come in<br>Tap a team to see fixtures, results and news</div>`;
     if(S.tab==='tables')$('#view').innerHTML=html;
-  }catch(e){if(S.tab==='tables')$('#view').innerHTML='<div class="empty">No table for this competition right now.</div>'}
+  }catch(e){if(S.tab==='tables'&&!silent)$('#view').innerHTML='<div class="empty">No table for this competition right now.</div>'}
 }
 const stat=(e,n)=>+(e.stats||[]).find(s=>s.name===n)?.value||0;
 const sv=(e,n)=>esc((e.stats||[]).find(s=>s.name===n)?.displayValue??'');
@@ -388,11 +429,13 @@ function toggleFav(t){
 }
 
 /* ---------- MATCH SHEET ---------- */
-async function openMatch(id,lg,pre){
+async function openMatch(id,lg,pre,silent){
   const m0=pre||(MCACHE.all||[]).find(x=>x.id==id);
-  openSheet(LN[lg]||'Match','<div class="spin"></div>');
+  const sheet=$('#sheet'),keepPane=silent?document.querySelector('#sheetBody [data-pane].on')?.textContent:null,keepScroll=sheet.scrollTop;
+  if(!silent)openSheet(LN[lg]||'Match','<div class="spin"></div>');
   let sm;
   try{sm=await get(API+lg+'/summary?event='+id)}catch(e){}
+  if(silent&&(!sm||S.stack.at(-1)?.k!=='m'+id))return reMatch(id,lg,pre,sm?60000:20000);
   const hd=sm?.header?.competitions?.[0];
   const m=hd?norm({id,date:hd.date,competitions:[hd]},lg):m0;
   if(!m){$('#sheetBody').innerHTML='<div class="empty">Match details unavailable.</div>';return}
@@ -411,9 +454,20 @@ async function openMatch(id,lg,pre){
   if(!tabs.length)tabs.push(['Info',`<div class="empty">${pre_?'Line-ups usually appear about an hour before kick-off.':'No extra details for this match.'}</div>`]);
   html+=`<div class="seg">${tabs.map((t,i)=>`<button class="chip ${i?'':'on'}" data-pane="${i}">${t[0]}</button>`).join('')}</div>`+
     tabs.map((t,i)=>`<div class="pane" data-p="${i}" ${i?'hidden':''}>${t[1]}</div>`).join('');
+  if(m.state!=='post')html+=`<div class="upd"><span class="dot"></span>Live · updated ${liveStamp()}</div>`;
   $('#sheetTitle').textContent=`${m.h.name} v ${m.a.name}`;
   $('#sheetBody').innerHTML=html;
-  if(live){clearTimeout(S.mt);S.mt=setTimeout(()=>{if($('#sheet').classList.contains('open')&&S.stack.at(-1)?.k==='m'+id)openMatch(id,lg,pre)},30000)}
+  if(keepPane){const b=[...document.querySelectorAll('#sheetBody [data-pane]')].find(x=>x.textContent===keepPane);if(b)b.click();sheet.scrollTop=keepScroll}
+  // live: every 20s · before kick-off: every minute (line-ups drop in) · full time: stop
+  if(m.state!=='post')reMatch(id,lg,pre,live?20000:60000);
+}
+function reMatch(id,lg,pre,ms){
+  clearTimeout(S.mt);
+  S.mt=setTimeout(()=>{
+    if(!$('#sheet').classList.contains('open')||S.stack.at(-1)?.k!=='m'+id)return;
+    if(document.hidden)return reMatch(id,lg,pre,5000);
+    openMatch(id,lg,pre,true);
+  },ms);
 }
 function eventsHtml(sm,m,m0){
   let ke=(sm?.keyEvents||[]).filter(e=>/goal|card|substitution|penalty/i.test(e.type?.text||'')&&!/kickoff|halftime|end/i.test(e.type?.type||''));
@@ -505,6 +559,7 @@ $('#sheetBack').onclick=()=>history.back();
 
 function show(tab){
   S.tab=tab;store.set('tab',tab);
+  const pl=document.getElementById('pill');if(pl)pl.hidden=true;PENDING=null;
   document.querySelectorAll('#tabs button').forEach(b=>b.classList.toggle('on',b.dataset.tab===tab));
   window.scrollTo(0,0);
   if(tab==='matches'){$('#subbar').innerHTML=matchesBar();loadMatches();setTimeout(()=>{const on=document.querySelector('#dates .on');on&&on.scrollIntoView({inline:'center',block:'nearest'})},0)}
@@ -526,6 +581,7 @@ document.addEventListener('click',e=>{
   if(d.team&&d.tlg)return pushSheet('t'+d.team,()=>openTeam(d.team,d.tlg));
   if(d.n)return pushSheet('n'+d.n,()=>openStory(d.n));
   if(d.tn)return pushSheet('n'+d.tn,()=>openStory(d.tn,TEAMNEWS));
+  if(b.id==='pill'){b.hidden=true;if(PENDING){NEWS=PENDING;PENDING=null;renderNews()}window.scrollTo({top:0,behavior:'smooth'});return}
   if(b.id==='alertSw'){
     if(!S.alerts&&'Notification' in window){Notification.requestPermission().then(p=>{S.alerts=p==='granted';store.set('alerts',S.alerts);if(!S.alerts)toast('Notifications are blocked in Chrome settings');renderFollowing()})}
     else{S.alerts=!S.alerts;store.set('alerts',S.alerts);renderFollowing()}
@@ -534,7 +590,9 @@ document.addEventListener('click',e=>{
 });
 // the sheet's match/team buttons that sit inside the sheet already caught above; table rows use data-team too
 $('#refresh').onclick=()=>{if(S.stack.length)return S.stack.at(-1).fn();show(S.tab)};
-document.addEventListener('visibilitychange',()=>{if(!document.hidden&&S.tab==='matches'&&!S.stack.length)loadMatches(true)});
+// coming back to the app: refresh whatever is on screen straight away
+document.addEventListener('visibilitychange',()=>{if(!document.hidden){for(const k in LAST)LAST[k]=0}});
+window.addEventListener('online',()=>{for(const k in LAST)LAST[k]=0;toast('Back online')});
 
 if('serviceWorker' in navigator)navigator.serviceWorker.register('sw.js').catch(()=>{});
 show(['matches','news','tables','following'].includes(S.tab)?S.tab:'matches');
