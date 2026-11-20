@@ -134,13 +134,50 @@ nav.tabs button.on{color:var(--acc)}
 .teamhead{display:flex;align-items:center;gap:14px;margin:6px 0 14px}
 .teamhead img{width:64px;height:64px;object-fit:contain}
 .teamhead h2{margin:0;font:700 30px/1 "Barlow Condensed",sans-serif}
-.favlist .row{display:flex;align-items:center;gap:12px;background:var(--card);border-radius:14px;padding:12px;margin-bottom:8px;width:100%;text-align:left}
-.favlist .row img{width:32px;height:32px;object-fit:contain}
+.row{display:flex;align-items:center;gap:12px;background:var(--card);border-radius:14px;padding:12px;margin-bottom:8px;width:100%;text-align:left}
+.row img{width:32px;height:32px;object-fit:contain}
 .sw{margin-left:auto;width:48px;height:28px;border-radius:14px;background:var(--line);position:relative;flex:none}
 .sw::after{content:"";position:absolute;top:3px;left:3px;width:22px;height:22px;border-radius:50%;background:#fff;transition:left .15s}
 .sw.on{background:var(--acc)}.sw.on::after{left:23px}
 .toast{position:fixed;left:50%;bottom:calc(76px + var(--safe-b));transform:translateX(-50%);background:var(--ink);color:var(--bg);padding:10px 16px;border-radius:12px;font-weight:600;font-size:13px;z-index:80;opacity:0;pointer-events:none;transition:opacity .2s}
 .toast.show{opacity:1}
+.seg2{display:flex;gap:4px;margin-top:8px;background:var(--card);border-radius:12px;padding:4px}
+.seg2 button{flex:1;min-height:36px;border-radius:9px;font-size:13px;font-weight:600;color:var(--mute)}
+.seg2 button.on{background:var(--card2);color:var(--ink)}
+.leader{display:grid;grid-template-columns:28px 44px 1fr auto;gap:10px;align-items:center;background:var(--card);border-radius:14px;padding:8px 12px;margin-bottom:6px;width:100%;text-align:left}
+.leader .rk{color:var(--mute);font-weight:600;text-align:center}
+.leader.top .rk{color:var(--acc)}
+.hs{position:relative;width:44px;height:44px;border-radius:50%;background:var(--card2);overflow:hidden;display:grid;place-items:center;flex:none}
+.hs img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:top;z-index:1}
+.hs b{font:700 16px "Barlow Condensed",sans-serif;color:var(--mute)}
+.who{display:flex;flex-direction:column;min-width:0}
+.who>b{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-weight:600}
+.who .meta{margin:0;display:flex;align-items:center;gap:5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.crest.sm{width:16px;height:16px}
+.flag{width:16px;height:11px;object-fit:cover;border-radius:2px}
+.leader .val{font:700 28px/1 "Barlow Condensed",sans-serif}
+.leader.top .val{color:var(--acc)}
+.squad{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:6px}
+.pc{display:flex;gap:10px;align-items:center;background:var(--card);border-radius:14px;padding:8px 10px}
+.inj{font-size:11px;color:var(--red);font-weight:600}
+.dash{background:var(--card);border-radius:16px;margin-bottom:10px;overflow:hidden}
+.dash .row{margin:0;background:none}
+.dl{display:flex;align-items:center;gap:8px;width:100%;text-align:left;padding:10px 12px;border-top:1px solid var(--line);font-size:14px;min-height:48px}
+.dl .k{width:40px;font-size:12px;color:var(--mute);font-weight:600;flex:none}
+.dl .r{margin-left:auto;text-align:right;font-size:13px;white-space:nowrap;display:flex;align-items:center;gap:6px}
+.dl .cd{display:block;color:var(--acc);font-weight:700}
+.dl .r:has(.cd){flex-direction:column;align-items:flex-end;gap:0}
+.acts{display:flex;gap:8px;justify-content:center;margin:12px 0 0;flex-wrap:wrap}
+.cdbig b{color:var(--acc);font-size:15px}
+.cm{display:grid;grid-template-columns:44px 1fr;gap:8px;padding:10px 0;border-bottom:1px solid var(--line);font-size:14px;line-height:1.5}
+.cm .min{font:700 16px "Barlow Condensed",sans-serif;color:var(--mute);text-align:center}
+.cm.goal{background:linear-gradient(90deg,color-mix(in srgb,var(--acc) 18%,transparent),transparent);border-radius:10px}
+.cm.goal b{color:var(--acc)}
+.search{width:100%;font:16px Inter,sans-serif;padding:14px 16px;border-radius:14px;border:1px solid var(--line);background:var(--card);color:var(--ink);margin-bottom:10px}
+.sr{display:flex;align-items:center;gap:6px}
+.sr .row{flex:1}
+.star{width:48px;height:48px;border-radius:12px;background:var(--card);font-size:22px;color:var(--mute);flex:none;margin-bottom:8px}
+.star.on{color:var(--acc)}
 .upd{font-size:11px;color:var(--mute);text-align:center;margin-top:12px;line-height:1.7}
 .dot{display:inline-block;width:6px;height:6px;border-radius:50%;background:#22c55e;margin-right:6px;vertical-align:1px;animation:pulse 2s infinite}
 .pill{position:fixed;top:calc(118px + var(--safe-t));left:50%;transform:translateX(-50%);z-index:25;background:var(--acc);color:var(--accInk);font-weight:700;font-size:13px;padding:10px 16px;border-radius:999px;box-shadow:0 6px 20px rgba(0,0,0,.35);min-height:40px}
@@ -153,6 +190,7 @@ nav.tabs button.on{color:var(--acc)}
   <div class="brand">
     <h1 class="cond">KICK<b>OFF</b></h1>
     <div style="display:flex;gap:8px">
+      <button class="iconbtn" data-open="search" aria-label="Search teams"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="M20 20l-4-4"/></svg></button>
       <button class="iconbtn" id="refresh" aria-label="Refresh"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M20 11a8 8 0 1 0-2.3 5.7M20 4v7h-7"/></svg></button>
     </div>
   </div>
@@ -194,7 +232,7 @@ const $=s=>document.querySelector(s);
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const store={get(k,d){try{const v=localStorage.getItem('ko_'+k);return v?JSON.parse(v):d}catch(e){return d}},set(k,v){try{localStorage.setItem('ko_'+k,JSON.stringify(v))}catch(e){}}};
 
-const S={tab:store.get('tab','matches'),day:0,mLeague:'all',nLeague:'top',tLeague:store.get('tLeague','eng.1'),
+const S={tab:store.get('tab','matches'),day:0,mLeague:'all',nLeague:'top',tLeague:store.get('tLeague','eng.1'),tView:'table',q:'',
   favs:store.get('favs',[]),alerts:store.get('alerts',false),lastScores:{},timer:null,stack:[]};
 
 async function get(url){
@@ -290,6 +328,7 @@ setInterval(async()=>{
     else if(S.tab==='matches'&&due('m',S.anyLive?20000:60000))await loadMatches(true);
     else if(S.tab==='news'&&due('n',60000))await loadNews(true);
     else if(S.tab==='tables'&&due('t',S.anyLive?45000:120000))await loadTable(true);
+    else if(S.tab==='following'&&S.favs.length&&due('f',S.anyLive?30000:60000))await loadDash();
     // keep scores fresh in the background so goal alerts fire on any screen
     if(S.tab!=='matches'&&S.favs.length&&due('bg',S.anyLive?30000:120000))await loadMatches(true,true);
   }finally{BUSY=false}
@@ -370,7 +409,8 @@ async function openStory(id,list){
   openSheet(LN[a._lg]||'News',`<article class="article">${img(a)?`<img class="lead" src="${esc(img(a))}" alt="">`:''}
     <h2>${esc(a.headline)}</h2><div class="meta">${new Date(a.published).toLocaleString([], {dateStyle:'medium',timeStyle:'short'})}${a.byline?' · '+esc(a.byline):''}</div>
     <div class="body" id="artBody"><p>${esc(a.description||'')}</p><div class="spin"></div></div>
-    <p><a class="btn" href="${esc(a.links?.web?.href||'#')}" target="_blank" rel="noopener">Read on ESPN ↗</a></p></article>`);
+    <p class="acts"><a class="btn" href="${esc(a.links?.web?.href||'#')}" target="_blank" rel="noopener">Read on ESPN ↗</a><button class="btn ghost" data-share="story">Share</button></p></article>`);
+  CUR={title:a.headline,text:a.headline,url:a.links?.web?.href};
   try{ // try the full story text; fall back to the summary if blocked
     const j=await get('https://content.core.api.espn.com/v1/sports/news/'+a.id);
     const s=j.headlines?.[0]?.story;
@@ -386,6 +426,7 @@ function sanitize(html){
 
 /* ---------- TABLES ---------- */
 async function loadTable(silent){
+  if(S.tView!=='table')return loadLeaders(silent);
   if(!silent)$('#view').innerHTML='<div class="spin"></div>';
   LAST.t=Date.now();
   try{
@@ -409,14 +450,69 @@ async function loadTable(silent){
 const stat=(e,n)=>+(e.stats||[]).find(s=>s.name===n)?.value||0;
 const sv=(e,n)=>esc((e.stats||[]).find(s=>s.name===n)?.displayValue??'');
 function tablesBar(){
-  return `<div class="chips">${LEAGUES.filter(l=>!['eng.fa','fifa.friendly'].includes(l.id)).map(l=>`<button class="chip ${S.tLeague===l.id?'on':''}" data-tl="${l.id}">${esc(l.n)}</button>`).join('')}</div>`;
+  const views=[['table','Table'],['goals','Top scorers'],['assists','Assists']];
+  return `<div class="chips">${LEAGUES.filter(l=>!['eng.fa','fifa.friendly'].includes(l.id)).map(l=>`<button class="chip ${S.tLeague===l.id?'on':''}" data-tl="${l.id}">${esc(l.n)}</button>`).join('')}</div>
+  <div class="seg2">${views.map(([k,n])=>`<button class="${S.tView===k?'on':''}" data-tv="${k}">${n}</button>`).join('')}</div>`;
+}
+
+/* ---------- TOP SCORERS / ASSISTS ---------- */
+async function loadLeaders(silent){
+  if(!silent)$('#view').innerHTML='<div class="spin"></div>';
+  LAST.t=Date.now();
+  const view=S.tView,lg=S.tLeague;
+  try{
+    const j=await get(API+lg+'/statistics');
+    if(view!==S.tView||lg!==S.tLeague||S.tab!=='tables')return;
+    const cat=(j.stats||[]).find(s=>s.name===(view==='goals'?'goalsLeaders':'assistsLeaders'));
+    const L=(cat?.leaders||[]).slice(0,30);
+    if(!L.length)throw 0;
+    const apps=s=>(String(s||'').match(/Matches:\s*(\d+)/)||[])[1]||'';
+    let rank=0,prev=null;
+    const html=L.map((x,i)=>{const a=x.athlete||{},t=a.team||{};if(x.value!==prev){rank=i+1;prev=x.value}
+      return `<button class="leader ${i<3?'top':''}" data-team="${esc(t.id)}" data-tlg="${esc(lg)}">
+        <span class="rk">${rank}</span>
+        <span class="hs"><img src="https://a.espncdn.com/i/headshots/soccer/players/full/${esc(a.id)}.png" alt="" loading="lazy" onerror="this.remove()"><b>${esc((a.shortName||a.displayName||'?').slice(0,1))}</b></span>
+        <span class="who"><b>${esc(a.displayName)}</b><span class="meta"><img class="crest sm" src="https://a.espncdn.com/i/teamlogos/soccer/500/${esc(t.id)}.png" alt="" loading="lazy" onerror="this.remove()">${esc(t.displayName||t.shortDisplayName||'')}${apps(x.displayValue)?' · '+apps(x.displayValue)+' apps':''}</span></span>
+        <span class="val">${esc(Math.round(x.value))}</span></button>`}).join('');
+    $('#view').innerHTML=`<div class="lg">${view==='goals'?'Goals':'Assists'} · ${esc(LN[lg])}</div>${html}<div class="upd"><span class="dot"></span>Live · updated ${liveStamp()}</div>`;
+  }catch(e){if(!silent&&S.tab==='tables')$('#view').innerHTML='<div class="empty">No player stats for this competition yet.</div>'}
 }
 
 /* ---------- FOLLOWING ---------- */
+/* My Teams dashboard: next match with countdown + last result for every followed team */
+const DASH={};
+async function loadDash(){
+  await Promise.allSettled(S.favs.map(async f=>{
+    const [r,u]=await Promise.allSettled([get(API+f.lg+'/teams/'+f.id+'/schedule'),get(API+f.lg+'/teams/'+f.id+'/schedule?fixture=true')]);
+    const ev=x=>(x.value?.events||[]).map(e=>norm(e,f.lg));
+    const last=ev(r).filter(m=>m.state==='post'&&!/postponed/i.test(m.detail)).sort((a,b)=>new Date(b.date)-new Date(a.date))[0];
+    const next=[...ev(u),...ev(r)].filter(m=>m.state!=='post').sort((a,b)=>new Date(a.date)-new Date(b.date))[0];
+    DASH[f.id]={last,next,at:Date.now()};
+  }));
+  LAST.f=Date.now();
+  if(S.tab==='following'&&!S.stack.length)renderFollowing();
+}
+function countdown(d){
+  const s=Math.max(0,(new Date(d)-Date.now())/1000),D=Math.floor(s/86400),H=Math.floor(s%86400/3600),M=Math.floor(s%3600/60);
+  return D?`${D}d ${H}h`:H?`${H}h ${M}m`:`${M}m`;
+}
+function dashCard(f){
+  const d=DASH[f.id];
+  const opp=m=>{const home=String(m.h.id)===String(f.id);return {o:home?m.a:m.h,v:home?'vs':'@',us:home?m.h:m.a,them:home?m.a:m.h}};
+  let next='',last='';
+  if(d?.next){const m=d.next,x=opp(m);TEAMEV.push(m);
+    next=`<button class="dl" data-m="${esc(m.id)}" data-lg="${esc(m.lg)}" data-te="1"><span class="k">${m.state==='in'?'<b style="color:var(--red)">LIVE</b>':'Next'}</span><img class="crest sm" src="${esc(x.o.logo)}" alt="">${x.v} ${esc(x.o.name)}<span class="r">${m.state==='in'?`<b>${esc(x.us.score)}–${esc(x.them.score)}</b> ${esc(m.clock||'')}`:`${new Date(m.date).toLocaleDateString([], {weekday:'short',day:'numeric',month:'short'})} ${tm(m.date)}<small class="cd">in ${countdown(m.date)}</small>`}</span></button>`}
+  if(d?.last){const m=d.last,x=opp(m);TEAMEV.push(m);const us=+x.us.score,th=+x.them.score,res=us>th?'W':us<th?'L':'D';
+    last=`<button class="dl" data-m="${esc(m.id)}" data-lg="${esc(m.lg)}" data-te="1"><span class="k">Last</span><img class="crest sm" src="${esc(x.o.logo)}" alt="">${x.v} ${esc(x.o.name)}<span class="r"><span class="form"><i class="${res}">${res}</i></span> ${esc(x.us.score)}–${esc(x.them.score)}</span></button>`}
+  return `<div class="dash"><button class="row" data-team="${esc(f.id)}" data-tlg="${esc(f.lg)}"><img src="${esc(f.logo)}" alt=""><div><b>${esc(f.name)}</b><div class="meta">${esc(LN[f.lg]||'')}</div></div><span style="margin-left:auto;color:var(--mute)">›</span></button>${d?next+last:'<div class="meta" style="padding:4px 12px 10px">Loading fixtures…</div>'}</div>`;
+}
 function renderFollowing(){
+  TEAMEV=[];
   let html=`<div class="favlist">`;
-  html+=S.favs.length?S.favs.map(f=>`<button class="row" data-team="${esc(f.id)}" data-tlg="${esc(f.lg)}"><img src="${esc(f.logo)}" alt=""><div><b>${esc(f.name)}</b><div class="meta">${esc(LN[f.lg]||'')}</div></div><span style="margin-left:auto;color:var(--mute)">›</span></button>`).join('')
-    :`<div class="empty">You’re not following any teams yet.<br><br>Open <b>Tables</b>, tap a team, then tap ☆ Follow.</div>`;
+  html+=S.favs.length?`<div class="lg">My teams</div>`+S.favs.map(dashCard).join('')
+    :`<div class="empty">You’re not following any teams yet.<br><br>Tap the search button at the top to find your team, or open <b>Tables</b> and tap one.</div>`;
+  html+=`<button class="btn ghost" data-open="search" style="width:100%;margin-top:6px">Find a team to follow</button>`;
+  if(S.favs.length&&S.favs.some(f=>!DASH[f.id]))loadDash();
   html+=`</div><div class="card" style="display:flex;align-items:center;gap:12px;margin-top:16px"><div><b>Goal alerts</b><div class="meta">Notify me when a team I follow scores, while Kickoff is open or running in the background</div></div><button class="sw ${S.alerts?'on':''}" id="alertSw" aria-label="Goal alerts" role="switch" aria-checked="${S.alerts}"></button></div>
   <div class="card"><b>Install on your phone</b><div class="meta">In Chrome, tap ⋮ then “Add to Home screen” / “Install app”. Kickoff opens full screen like a normal app.</div></div>
   <div class="upd">Scores, news and photos: ESPN public data · personal use</div>`;
@@ -446,8 +542,15 @@ async function openMatch(id,lg,pre,silent){
     <div><div class="big">${pre_?tm(m.date):esc(m.h.score)+' – '+esc(m.a.score)}</div><div class="stt ${live?'live':''}">${esc(live?(m.detail||m.clock):pre_?new Date(m.date).toLocaleDateString([], {weekday:'short',day:'numeric',month:'short'}):m.detail)}</div></div>
     <button data-team="${esc(m.a.id)}" data-tlg="${esc(lg)}"><img src="${esc(m.a.logo)}" alt=""><div class="nm">${esc(m.a.full||m.a.name)}</div></button></div>
     <p class="under">${esc(m.venue)}${sm?.gameInfo?.attendance?' · Att. '+Number(sm.gameInfo.attendance).toLocaleString():''}</p>`;
+  if(pre_)html+=`<p class="under cdbig">Kick-off in <b>${countdown(m.date)}</b></p>`;
+  const shareTxt=pre_?`${m.h.full||m.h.name} v ${m.a.full||m.a.name} · ${new Date(m.date).toLocaleString([], {weekday:'short',day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'})}`
+    :`${m.h.full||m.h.name} ${m.h.score}–${m.a.score} ${m.a.full||m.a.name}${live?' ('+(m.clock||'live')+')':' (FT)'}`;
+  CUR={text:shareTxt+' ⚽ via Kickoff',title:`${m.h.name} v ${m.a.name}`,
+    cal:pre_?calLink(`${m.h.full||m.h.name} v ${m.a.full||m.a.name}`,m.date,`${LN[lg]||''} · ${m.venue||''}`):null};
+  html+=`<div class="acts"><button class="btn ghost" data-share="match">Share</button>${CUR.cal?`<a class="btn ghost" href="${esc(CUR.cal)}" target="_blank" rel="noopener">Add to calendar</a>`:''}</div>`;
   const tabs=[];
   const evs=eventsHtml(sm,m,m0);if(evs)tabs.push(['Events',evs]);
+  const cm=commentaryHtml(sm);if(cm)tabs.push(['Live text',cm]);
   const st=statsHtml(sm);if(st)tabs.push(['Stats',st]);
   const lu=lineupsHtml(sm);if(lu)tabs.push(['Line-ups',lu]);
   const fm=formHtml(sm);if(fm)tabs.push(['Form',fm]);
@@ -460,6 +563,24 @@ async function openMatch(id,lg,pre,silent){
   if(keepPane){const b=[...document.querySelectorAll('#sheetBody [data-pane]')].find(x=>x.textContent===keepPane);if(b)b.click();sheet.scrollTop=keepScroll}
   // live: every 20s · before kick-off: every minute (line-ups drop in) · full time: stop
   if(m.state!=='post')reMatch(id,lg,pre,live?20000:60000);
+}
+let CUR=null;
+function calLink(title,date,where){
+  const f=d=>new Date(d).toISOString().replace(/[-:]/g,'').replace(/\.\d{3}/,'');
+  const end=new Date(new Date(date).getTime()+115*60000);
+  return 'https://calendar.google.com/calendar/render?action=TEMPLATE&text='+encodeURIComponent('⚽ '+title)+'&dates='+f(date)+'/'+f(end)+'&details='+encodeURIComponent(where+'\nFollow live in Kickoff: '+location.href.split('#')[0].split('?')[0]);
+}
+async function share(){
+  if(!CUR)return;
+  const url=location.href.split('#')[0].split('?')[0];
+  try{if(navigator.share){await navigator.share({title:CUR.title,text:CUR.text,url:CUR.url||url});return}}catch(e){if(e.name==='AbortError')return}
+  try{await navigator.clipboard.writeText(CUR.text+' '+(CUR.url||url));toast('Copied — paste it anywhere')}catch(e){toast('Sharing isn’t available here')}
+}
+function commentaryHtml(sm){
+  const C=(sm?.commentary||[]).filter(c=>c.text);
+  if(!C.length)return'';
+  return C.slice().reverse().map(c=>{const t=c.play?.type?.text||'';const goal=/goal/i.test(t)&&!/kick|attempt|saved|miss/i.test(t);
+    return `<div class="cm ${goal?'goal':''}"><span class="min">${esc(c.time?.displayValue||'')}</span><span>${goal?'<b>GOAL!</b> ':''}${esc(c.text)}</span></div>`}).join('');
 }
 function reMatch(id,lg,pre,ms){
   clearTimeout(S.mt);
@@ -517,7 +638,7 @@ function formHtml(sm){
 /* ---------- TEAM SHEET ---------- */
 async function openTeam(id,lg){
   openSheet('Team','<div class="spin"></div>');
-  const [sch,fx,nw]=await Promise.allSettled([get(API+lg+'/teams/'+id+'/schedule'),get(API+lg+'/teams/'+id+'/schedule?fixture=true'),get(API+lg+'/news?limit=50')]);
+  const [sch,fx,nw,ro]=await Promise.allSettled([get(API+lg+'/teams/'+id+'/schedule'),get(API+lg+'/teams/'+id+'/schedule?fixture=true'),get(API+lg+'/news?limit=50'),get(API+lg+'/teams/'+id+'/roster')]);
   const team=sch.value?.team||fx.value?.team||{};
   const t={id:String(id),name:team.shortDisplayName||team.displayName||'Team',logo:logoOf(team),lg};
   $('#sheetTitle').textContent=team.displayName||'Team';
@@ -530,14 +651,51 @@ async function openTeam(id,lg){
   const news=(nw.value?.articles||[]).filter(a=>(a.categories||[]).some(c=>String(c.teamId)===String(id))).map(a=>({...a,_lg:lg}));
   TEAMNEWS=news;
   let html=`<div class="teamhead"><img src="${esc(t.logo)}" alt=""><div><h2>${esc(team.displayName||'')}</h2><div class="meta">${esc(LN[lg]||'')}${team.standingSummary?' · '+esc(team.standingSummary):''}</div></div></div>`;
-  html+=up.length?`<div class="lg">Upcoming</div>`+up.map(m=>teamRow(m)).join(''):'';
-  html+=past.length?`<div class="lg">Recent results</div>`+past.map(m=>teamRow(m)).join(''):'';
-  html+=news.length?`<div class="lg">Latest news</div>`+news.slice(0,10).map(a=>`<button class="story" data-tn="${esc(a.id)}"><div><h3>${esc(a.headline)}</h3><div class="meta">${ago(a.published)}</div></div>${img(a)?`<img src="${esc(img(a))}" alt="" loading="lazy">`:'<span></span>'}</button>`).join(''):'';
-  if(!up.length&&!past.length&&!news.length)html+='<div class="empty">No fixtures found.</div>';
+  const panes=[];
+  const fx_=(up.length?`<div class="lg">Upcoming</div>`+up.map(m=>teamRow(m)).join(''):'')+(past.length?`<div class="lg">Recent results</div>`+past.map(m=>teamRow(m)).join(''):'');
+  panes.push(['Fixtures',fx_||'<div class="empty">No fixtures found.</div>']);
+  const sq=squadHtml(ro.value?.athletes);if(sq)panes.push(['Squad',sq]);
+  if(news.length)panes.push(['News',news.slice(0,15).map(a=>`<button class="story" data-tn="${esc(a.id)}"><div><h3>${esc(a.headline)}</h3><div class="meta">${ago(a.published)}</div></div>${img(a)?`<img src="${esc(img(a))}" alt="" loading="lazy">`:'<span></span>'}</button>`).join('')]);
+  html+=`<div class="seg">${panes.map((t,i)=>`<button class="chip ${i?'':'on'}" data-pane="${i}">${t[0]}</button>`).join('')}</div>`+
+    panes.map((t,i)=>`<div class="pane" data-p="${i}" ${i?'hidden':''}>${t[1]}</div>`).join('');
   $('#sheetBody').innerHTML=html;
   TEAMEV=[...up,...past];
 }
 let TEAMNEWS=[],TEAMEV=[];
+function squadHtml(A){
+  if(!A?.length)return'';
+  const order=['Goalkeeper','Defender','Midfielder','Forward'];
+  const grp=p=>{const n=p.position?.name||p.position?.displayName||'';return order.find(o=>n.toLowerCase().includes(o.toLowerCase()))||'Other'};
+  return [...order,'Other'].map(g=>{const ps=A.filter(p=>grp(p)===g).sort((a,b)=>(+a.jersey||99)-(+b.jersey||99));if(!ps.length)return'';
+    return `<div class="lg">${g==='Other'?'Squad':g+'s'}</div><div class="squad">`+ps.map(p=>`<div class="pc">
+      <span class="hs"><img src="${esc(p.headshot?.href||'')}" alt="" loading="lazy" onerror="this.remove()"><b>${esc(p.jersey||'')}</b></span>
+      <span class="who"><b>${esc(p.displayName)}</b><span class="meta">${p.jersey?'#'+esc(p.jersey)+' · ':''}${p.age?esc(p.age)+' yrs · ':''}${p.flag?.href?`<img class="flag" src="${esc(p.flag.href)}" alt="" loading="lazy">`:''}${esc(p.citizenship||'')}</span>
+      ${p.injuries?.length?`<span class="inj">Injured</span>`:''}</span></div>`).join('')+`</div>`}).join('');
+}
+
+/* ---------- SEARCH: every team in every league ---------- */
+let TEAMS=null;
+async function loadTeams(){
+  const c=store.get('teams',null);
+  if(c&&Date.now()-c.at<3*864e5){TEAMS=c.list;return}
+  const lgs=LEAGUES.filter(l=>!['eng.fa','fifa.friendly'].includes(l.id)).sort((a,b)=>a.id.startsWith('uefa')-b.id.startsWith('uefa')); // domestic league first
+  const res=await Promise.allSettled(lgs.map(l=>get(API+l.id+'/teams').then(j=>({lg:l.id,t:j.sports?.[0]?.leagues?.[0]?.teams||[]}))));
+  const seen=new Set(),list=[];
+  for(const r of res)if(r.status==='fulfilled')for(const x of r.value.t){const t=x.team;if(!t||seen.has(t.id))continue;seen.add(t.id);
+    list.push({id:String(t.id),name:t.displayName,short:t.shortDisplayName||t.displayName,logo:logoOf(t),lg:r.value.lg,k:fold(t.displayName+' '+(t.shortDisplayName||'')+' '+(t.abbreviation||'')+' '+(t.nickname||'')+' '+(t.location||''))})}
+  if(list.length){TEAMS=list;store.set('teams',{at:Date.now(),list})}
+}
+const fold=s=>String(s||'').normalize('NFD').replace(/[̀-ͯ]/g,'').toLowerCase();
+async function openSearch(){
+  openSheet('Find a team',`<input id="q" class="search" type="search" placeholder="Search teams — e.g. Al Hilal, Barça, Spurs" autocomplete="off" enterkeyhint="search"><div id="results"><div class="spin"></div></div>`);
+  const q=$('#q');q.value=S.q||'';setTimeout(()=>q.focus(),250);
+  if(!TEAMS)await loadTeams();
+  const run=()=>{const v=fold(q.value.trim());const box=$('#results');if(!box)return;
+    if(!TEAMS?.length){box.innerHTML='<div class="empty">Couldn’t load teams. Check your connection.</div>';return}
+    const hits=v?TEAMS.filter(t=>t.k.includes(v)).sort((a,b)=>(b.k.startsWith(v)-a.k.startsWith(v))).slice(0,40):TEAMS.filter(t=>isFav(t.id)).concat(TEAMS.filter(t=>!isFav(t.id)&&t.lg==='eng.1'));
+    box.innerHTML=(v?'':'<div class="lg">Popular · or type to search '+TEAMS.length+' teams</div>')+(hits.length?hits.map(t=>`<div class="sr"><button class="row" data-team="${esc(t.id)}" data-tlg="${esc(t.lg)}"><img src="${esc(t.logo)}" alt="" loading="lazy"><div><b>${esc(t.name)}</b><div class="meta">${esc(LN[t.lg]||'')}</div></div></button><button class="star ${isFav(t.id)?'on':''}" data-star="${esc(t.id)}" aria-label="Follow ${esc(t.name)}">${isFav(t.id)?'★':'☆'}</button></div>`).join(''):'<div class="empty">No team matches that.</div>');};
+  q.addEventListener('input',()=>{S.q=q.value;run()});run();
+}
 function teamRow(m){
   const d=new Date(m.date);
   const lab=m.state==='pre'?d.toLocaleDateString([], {day:'numeric',month:'short'})+'<br>'+tm(m.date):d.toLocaleDateString([], {day:'numeric',month:'short'})+'<br>'+statusLabel(m);
@@ -552,7 +710,7 @@ function openSheet(title,body){
 function pushSheet(k,fn){S.stack.push({k,fn});history.pushState({s:S.stack.length},'');fn()}
 function closeSheet(){
   S.stack.pop();
-  if(S.stack.length){S.stack.at(-1).fn()}else{$('#sheet').classList.remove('open');if(S.tab==='tables')loadTable();if(S.tab==='matches')renderMatches()}
+  if(S.stack.length){S.stack.at(-1).fn()}else{$('#sheet').classList.remove('open');if(S.tab==='tables')loadTable();if(S.tab==='matches')renderMatches();if(S.tab==='following'){renderFollowing();loadDash()}}
 }
 window.addEventListener('popstate',()=>{if(S.stack.length)closeSheet()});
 $('#sheetBack').onclick=()=>history.back();
@@ -565,7 +723,7 @@ function show(tab){
   if(tab==='matches'){$('#subbar').innerHTML=matchesBar();loadMatches();setTimeout(()=>{const on=document.querySelector('#dates .on');on&&on.scrollIntoView({inline:'center',block:'nearest'})},0)}
   if(tab==='news'){$('#subbar').innerHTML=newsBar();loadNews()}
   if(tab==='tables'){$('#subbar').innerHTML=tablesBar();loadTable()}
-  if(tab==='following'){$('#subbar').innerHTML='';renderFollowing()}
+  if(tab==='following'){$('#subbar').innerHTML='';renderFollowing();if(S.favs.length)loadDash()}
 }
 
 document.addEventListener('click',e=>{
@@ -581,6 +739,10 @@ document.addEventListener('click',e=>{
   if(d.team&&d.tlg)return pushSheet('t'+d.team,()=>openTeam(d.team,d.tlg));
   if(d.n)return pushSheet('n'+d.n,()=>openStory(d.n));
   if(d.tn)return pushSheet('n'+d.tn,()=>openStory(d.tn,TEAMNEWS));
+  if(d.tv){S.tView=d.tv;$('#subbar').innerHTML=tablesBar();loadTable();return}
+  if(d.open==='search')return pushSheet('search',openSearch);
+  if(d.share)return share();
+  if(d.star){const t=(TEAMS||[]).find(x=>x.id===d.star);if(t){toggleFav({id:t.id,name:t.short,logo:t.logo,lg:t.lg});b.classList.toggle('on',isFav(t.id));b.textContent=isFav(t.id)?'★':'☆'}return}
   if(b.id==='pill'){b.hidden=true;if(PENDING){NEWS=PENDING;PENDING=null;renderNews()}window.scrollTo({top:0,behavior:'smooth'});return}
   if(b.id==='alertSw'){
     if(!S.alerts&&'Notification' in window){Notification.requestPermission().then(p=>{S.alerts=p==='granted';store.set('alerts',S.alerts);if(!S.alerts)toast('Notifications are blocked in Chrome settings');renderFollowing()})}
