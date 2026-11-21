@@ -6,6 +6,7 @@
 <meta name="theme-color" content="#0a1310">
 <title>Kickoff</title>
 <link rel="manifest" href="manifest.json">
+<link rel="stylesheet" href="community.css">
 <link rel="icon" href="icon-192.png">
 <link rel="apple-touch-icon" href="icon-192.png">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -80,7 +81,7 @@ tr.myteam{background:var(--card2)}
 @media(max-width:420px){.hide-s{display:none}}
 .grpname{margin:16px 0 8px;font:700 18px "Barlow Condensed",sans-serif}
 /* bottom nav */
-nav.tabs{position:fixed;left:0;right:0;bottom:0;z-index:30;display:grid;grid-template-columns:repeat(4,1fr);background:var(--bg);border-top:1px solid var(--line);padding-bottom:var(--safe-b)}
+nav.tabs{position:fixed;left:0;right:0;bottom:0;z-index:30;display:grid;grid-template-columns:repeat(5,1fr);background:var(--bg);border-top:1px solid var(--line);padding-bottom:var(--safe-b)}
 nav.tabs button{padding:10px 0 8px;display:flex;flex-direction:column;align-items:center;gap:3px;font-size:11px;font-weight:600;color:var(--mute);min-height:56px}
 nav.tabs button svg{width:22px;height:22px}
 nav.tabs button.on{color:var(--acc)}
@@ -191,6 +192,7 @@ nav.tabs button.on{color:var(--acc)}
     <h1 class="cond">KICK<b>OFF</b></h1>
     <div style="display:flex;gap:8px">
       <button class="iconbtn" data-open="search" aria-label="Search teams"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="M20 20l-4-4"/></svg></button>
+      <button class="iconbtn me" id="meBtn" data-open="me" aria-label="My profile"></button>
       <button class="iconbtn" id="refresh" aria-label="Refresh"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M20 11a8 8 0 1 0-2.3 5.7M20 4v7h-7"/></svg></button>
     </div>
   </div>
@@ -202,7 +204,8 @@ nav.tabs button.on{color:var(--acc)}
   <button data-tab="matches" class="on"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 7l4 3-1.5 5h-5L8 10z"/></svg>Matches</button>
   <button data-tab="news"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M7 8h10M7 12h10M7 16h6"/></svg>News</button>
   <button data-tab="tables"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 6h16M4 12h16M4 18h16M9 4v16"/></svg>Tables</button>
-  <button data-tab="following"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M12 3l2.7 5.6 6.1.9-4.4 4.3 1 6.1L12 17l-5.4 2.9 1-6.1L3.2 9.5l6.1-.9z"/></svg>Following</button>
+  <button data-tab="fans"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="9" cy="8" r="3.2"/><circle cx="17" cy="9" r="2.6"/><path d="M3 20c.8-3.5 3.2-5.5 6-5.5s5.2 2 6 5.5M15 14.6c2.6-.3 4.9 1.4 5.8 4.4"/></svg>Fans</button>
+  <button data-tab="turfs"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="5" width="18" height="14" rx="1.5"/><path d="M12 5v14"/><circle cx="12" cy="12" r="2.6"/><path d="M3 9.5h2.5v5H3M21 9.5h-2.5v5H21"/></svg>Turfs</button>
 </nav>
 
 <section class="sheet" id="sheet" aria-modal="true" role="dialog">
@@ -508,7 +511,7 @@ function dashCard(f){
 }
 function renderFollowing(){
   TEAMEV=[];
-  let html=`<div class="favlist">`;
+  let html=`<div id="meTop"></div><div class="favlist">`;
   html+=S.favs.length?`<div class="lg">My teams</div>`+S.favs.map(dashCard).join('')
     :`<div class="empty">You’re not following any teams yet.<br><br>Tap the search button at the top to find your team, or open <b>Tables</b> and tap one.</div>`;
   html+=`<button class="btn ghost" data-open="search" style="width:100%;margin-top:6px">Find a team to follow</button>`;
@@ -517,6 +520,7 @@ function renderFollowing(){
   <div class="card"><b>Install on your phone</b><div class="meta">In Chrome, tap ⋮ then “Add to Home screen” / “Install app”. Kickoff opens full screen like a normal app.</div></div>
   <div class="upd">Scores, news and photos: ESPN public data · personal use</div>`;
   $('#view').innerHTML=html;
+  window.KC?.renderMe(document.getElementById('meTop'));
 }
 function toggleFav(t){
   if(isFav(t.id)){S.favs=S.favs.filter(f=>f.id!=t.id);toast('Unfollowed '+t.name)}
@@ -527,6 +531,7 @@ function toggleFav(t){
 /* ---------- MATCH SHEET ---------- */
 async function openMatch(id,lg,pre,silent){
   const m0=pre||(MCACHE.all||[]).find(x=>x.id==id);
+  const keepFans=silent?document.getElementById('fansPane'):null;
   const sheet=$('#sheet'),keepPane=silent?document.querySelector('#sheetBody [data-pane].on')?.textContent:null,keepScroll=sheet.scrollTop;
   if(!silent)openSheet(LN[lg]||'Match','<div class="spin"></div>');
   let sm;
@@ -549,6 +554,7 @@ async function openMatch(id,lg,pre,silent){
     cal:pre_?calLink(`${m.h.full||m.h.name} v ${m.a.full||m.a.name}`,m.date,`${LN[lg]||''} · ${m.venue||''}`):null};
   html+=`<div class="acts"><button class="btn ghost" data-share="match">Share</button>${CUR.cal?`<a class="btn ghost" href="${esc(CUR.cal)}" target="_blank" rel="noopener">Add to calendar</a>`:''}</div>`;
   const tabs=[];
+  if(window.KC)tabs.push(['Fans',KC.matchPane(m)]);
   const evs=eventsHtml(sm,m,m0);if(evs)tabs.push(['Events',evs]);
   const cm=commentaryHtml(sm);if(cm)tabs.push(['Live text',cm]);
   const st=statsHtml(sm);if(st)tabs.push(['Stats',st]);
@@ -560,6 +566,8 @@ async function openMatch(id,lg,pre,silent){
   if(m.state!=='post')html+=`<div class="upd"><span class="dot"></span>Live · updated ${liveStamp()}</div>`;
   $('#sheetTitle').textContent=`${m.h.name} v ${m.a.name}`;
   $('#sheetBody').innerHTML=html;
+  if(keepFans){const ph=document.getElementById('fansPane');if(ph)ph.replaceWith(keepFans)}else if(window.KC)KC.mountMatch(m);
+  if(!keepPane&&!silent){const first=document.querySelector('#sheetBody [data-pane]');const ev=[...document.querySelectorAll('#sheetBody [data-pane]')].find(x=>x.textContent===(S.wantPane||'Events'));if(ev&&ev!==first)ev.click();S.wantPane=null}
   if(keepPane){const b=[...document.querySelectorAll('#sheetBody [data-pane]')].find(x=>x.textContent===keepPane);if(b)b.click();sheet.scrollTop=keepScroll}
   // live: every 20s · before kick-off: every minute (line-ups drop in) · full time: stop
   if(m.state!=='post')reMatch(id,lg,pre,live?20000:60000);
@@ -570,6 +578,7 @@ function calLink(title,date,where){
   const end=new Date(new Date(date).getTime()+115*60000);
   return 'https://calendar.google.com/calendar/render?action=TEMPLATE&text='+encodeURIComponent('⚽ '+title)+'&dates='+f(date)+'/'+f(end)+'&details='+encodeURIComponent(where+'\nFollow live in Kickoff: '+location.href.split('#')[0].split('?')[0]);
 }
+async function shareText(text){CUR={text,title:'Kickoff'};return share()}
 async function share(){
   if(!CUR)return;
   const url=location.href.split('#')[0].split('?')[0];
@@ -688,14 +697,14 @@ async function loadTeams(){
 }
 const fold=s=>String(s||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase();
 const NICK={barca:'barcelona',spurs:'tottenham','man utd':'manchester united','man u':'manchester united','man united':'manchester united',psg:'paris saint germain',juve:'juventus',atleti:'atletico',inter:'internazionale',bayern:'bayern munich',bvb:'dortmund',gunners:'arsenal',wolves:'wolverhampton',forest:'nottingham forest',hammers:'west ham',toffees:'everton',magpies:'newcastle',villa:'aston villa',madrid:'real madrid',ittihad:'ittihad',nassr:'nassr'};
-async function openSearch(){
-  openSheet('Find a team',`<input id="q" class="search" type="search" placeholder="Search teams — e.g. Al Hilal, Barça, Spurs" autocomplete="off" enterkeyhint="search"><div id="results"><div class="spin"></div></div>`);
+async function openSearch(mode){
+  openSheet(mode==='club'?'Find your fan club':'Find a team',`<input id="q" class="search" type="search" placeholder="Search teams — e.g. Al Hilal, Barça, Spurs" autocomplete="off" enterkeyhint="search"><div id="results"><div class="spin"></div></div>`);
   const q=$('#q');q.value=S.q||'';setTimeout(()=>q.focus(),250);
   if(!TEAMS)await loadTeams();
   const run=()=>{let v=fold(q.value.trim()).replace(/[-.]/g,' ');if(NICK[v])v=NICK[v];const box=$('#results');if(!box)return;
     if(!TEAMS?.length){box.innerHTML='<div class="empty">Couldn’t load teams. Check your connection.</div>';return}
     const hits=v?TEAMS.filter(t=>t.k.includes(v)).sort((a,b)=>(b.k.startsWith(v)-a.k.startsWith(v))).slice(0,40):TEAMS.filter(t=>isFav(t.id)).concat(TEAMS.filter(t=>!isFav(t.id)&&t.lg==='eng.1'));
-    box.innerHTML=(v?'':'<div class="lg">Popular · or type to search '+TEAMS.length+' teams</div>')+(hits.length?hits.map(t=>`<div class="sr"><button class="row" data-team="${esc(t.id)}" data-tlg="${esc(t.lg)}"><img src="${esc(t.logo)}" alt="" loading="lazy"><div><b>${esc(t.name)}</b><div class="meta">${esc(LN[t.lg]||'')}</div></div></button><button class="star ${isFav(t.id)?'on':''}" data-star="${esc(t.id)}" aria-label="Follow ${esc(t.name)}">${isFav(t.id)?'★':'☆'}</button></div>`).join(''):'<div class="empty">No team matches that.</div>');};
+    box.innerHTML=(v?'':'<div class="lg">Popular · or type to search '+TEAMS.length+' teams</div>')+(hits.length?hits.map(t=>`<div class="sr"><button class="row" ${mode==='club'?`data-kc="club" data-club="${esc(t.id)}"`:`data-team="${esc(t.id)}" data-tlg="${esc(t.lg)}"`}><img src="${esc(t.logo)}" alt="" loading="lazy"><div><b>${esc(t.name)}</b><div class="meta">${esc(LN[t.lg]||'')}</div></div></button><button class="star ${isFav(t.id)?'on':''}" data-star="${esc(t.id)}" aria-label="Follow ${esc(t.name)}">${isFav(t.id)?'★':'☆'}</button></div>`).join(''):'<div class="empty">No team matches that.</div>');};
   q.addEventListener('input',()=>{S.q=q.value;run()});run();
 }
 function teamRow(m){
@@ -711,8 +720,8 @@ function openSheet(title,body){
 }
 function pushSheet(k,fn){S.stack.push({k,fn});history.pushState({s:S.stack.length},'');fn()}
 function closeSheet(){
-  S.stack.pop();
-  if(S.stack.length){S.stack.at(-1).fn()}else{$('#sheet').classList.remove('open');if(S.tab==='tables')loadTable();if(S.tab==='matches')renderMatches();if(S.tab==='following'){renderFollowing();loadDash()}}
+  S.stack.pop();window.KC?.stopSheet();
+  if(S.stack.length){S.stack.at(-1).fn()}else{$('#sheet').classList.remove('open');if(S.tab==='tables')loadTable();if(S.tab==='matches')renderMatches();if(S.tab==='following'){renderFollowing();loadDash()}if(['fans','turfs'].includes(S.tab)&&window.KC){window.KC.stop();S.tab==='fans'?KC.renderFans():KC.renderTurfs()}}
 }
 window.addEventListener('popstate',()=>{if(S.stack.length)closeSheet()});
 $('#sheetBack').onclick=()=>history.back();
@@ -726,7 +735,11 @@ function show(tab){
   if(tab==='news'){$('#subbar').innerHTML=newsBar();loadNews()}
   if(tab==='tables'){$('#subbar').innerHTML=tablesBar();loadTable()}
   if(tab==='following'){$('#subbar').innerHTML='';renderFollowing();if(S.favs.length)loadDash()}
+  window.KC?.stop();
+  if(tab==='fans'){if(!window.KC)return($('#subbar').innerHTML='',$('#view').innerHTML='<div class="spin"></div>',setTimeout(()=>{if(!window.KC&&S.tab==='fans')$('#view').innerHTML='<div class="empty">The community needs an internet connection. Check your connection and tap refresh.</div>'},9000));$('#subbar').innerHTML=KC.fansBar();KC.renderFans()}
+  if(tab==='turfs'){if(!window.KC)return($('#subbar').innerHTML='',$('#view').innerHTML='<div class="spin"></div>',setTimeout(()=>{if(!window.KC&&S.tab==='turfs')$('#view').innerHTML='<div class="empty">The community needs an internet connection. Check your connection and tap refresh.</div>'},9000));$('#subbar').innerHTML=KC.turfsBar();KC.renderTurfs()}
 }
+window.addEventListener('kc-ready',()=>{if(['fans','turfs','following'].includes(S.tab)&&!S.stack.length)show(S.tab)});
 
 document.addEventListener('click',e=>{
   const b=e.target.closest('button,tr');if(!b)return;
@@ -737,12 +750,13 @@ document.addEventListener('click',e=>{
   if(d.nl){S.nLeague=d.nl;$('#subbar').innerHTML=newsBar();loadNews();return}
   if(d.tl){S.tLeague=d.tl;store.set('tLeague',d.tl);$('#subbar').innerHTML=tablesBar();loadTable();return}
   if(d.pane!=null){const root=b.closest('.sbody');root.querySelectorAll('[data-pane]').forEach(x=>x.classList.toggle('on',x===b));root.querySelectorAll('.pane').forEach(p=>p.hidden=p.dataset.p!==d.pane);return}
-  if(d.m){const lg=d.lg;const pre=d.te?TEAMEV.find(x=>x.id==d.m):null;return pushSheet('m'+d.m,()=>openMatch(d.m,lg,pre))}
+  if(d.m){const lg=d.lg;const pre=d.te?TEAMEV.find(x=>x.id==d.m):null;if(d.fans)S.wantPane='Fans';return pushSheet('m'+d.m,()=>openMatch(d.m,lg,pre))}
   if(d.team&&d.tlg)return pushSheet('t'+d.team,()=>openTeam(d.team,d.tlg));
   if(d.n)return pushSheet('n'+d.n,()=>openStory(d.n));
   if(d.tn)return pushSheet('n'+d.tn,()=>openStory(d.tn,TEAMNEWS));
   if(d.tv){S.tView=d.tv;$('#subbar').innerHTML=tablesBar();loadTable();return}
-  if(d.open==='search')return pushSheet('search',openSearch);
+  if(d.open==='search')return pushSheet('search',()=>openSearch());
+  if(d.open==='me'){if(S.stack.length){S.stack=[];$('#sheet').classList.remove('open')}return show('following')}
   if(d.share)return share();
   if(d.star){const t=(TEAMS||[]).find(x=>x.id===d.star);if(t){toggleFav({id:t.id,name:t.short,logo:t.logo,lg:t.lg});b.classList.toggle('on',isFav(t.id));b.textContent=isFav(t.id)?'★':'☆'}return}
   if(b.id==='pill'){b.hidden=true;if(PENDING){NEWS=PENDING;PENDING=null;renderNews()}window.scrollTo({top:0,behavior:'smooth'});return}
@@ -758,9 +772,13 @@ $('#refresh').onclick=()=>{if(S.stack.length)return S.stack.at(-1).fn();show(S.t
 document.addEventListener('visibilitychange',()=>{if(!document.hidden){for(const k in LAST)LAST[k]=0}});
 window.addEventListener('online',()=>{for(const k in LAST)LAST[k]=0;toast('Back online')});
 
+window.KO={esc,toast,ago,get,API,API2,LN,LEAGUES,S,store,norm,tm,isFav,matchRow,fold,openSheet,pushSheet,shareText,openSearch,loadTeams,TEAMS:()=>TEAMS,TEAMEV:()=>TEAMEV,
+  follow:t=>{if(!isFav(t.id))toggleFav(t)},topKey:()=>S.stack.at(-1)?.k,
+  refreshView:()=>{if(S.stack.length){const k=S.stack.at(-1).k;if(!/^m/.test(k))S.stack.at(-1).fn()}else if(['fans','turfs','following'].includes(S.tab))show(S.tab)}};
 if('serviceWorker' in navigator)navigator.serviceWorker.register('sw.js').catch(()=>{});
-show(['matches','news','tables','following'].includes(S.tab)?S.tab:'matches');
+show(['matches','news','tables','following','fans','turfs'].includes(S.tab)?S.tab:'matches');
 }
 </script>
+<script type="module" src="community.js"></script>
 </body>
 </html>

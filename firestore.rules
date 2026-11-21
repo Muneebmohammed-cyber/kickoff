@@ -1,0 +1,106 @@
+rules_version = '2';
+// Kickoff security rules: anyone can read public community content; only signed-in users write,
+// and only their own things. Turf owners manage their own turfs and bookings.
+service cloud.firestore {
+  match /databases/{database}/documents {
+    function signedIn() { return request.auth != null; }
+    function isMe(uid) { return signedIn() && request.auth.uid == uid; }
+    function onlyChanged(keys) { return request.resource.data.diff(resource.data).affectedKeys().hasOnly(keys); }
+    function shortText(s, n) { return s is string && s.size() <= n; }
+
+    match /users/{uid} {
+      allow read: if true;
+      allow create, update: if isMe(uid);
+    }
+
+    match /posts/{id} {
+      allow read: if true;
+      allow create: if signedIn() && request.resource.data.uid == request.auth.uid
+        && shortText(request.resource.data.text, 1500) && request.resource.data.likes.size() == 0;
+      allow update: if signedIn() && (
+          (resource.data.uid == request.auth.uid && onlyChanged(['text', 'image']))
+          // anyone may add/remove only their own like, or bump the comment counter by one
+          || (onlyChanged(['likes'])
+              && request.resource.data.likes.toSet().difference(resource.data.likes.toSet()).union(
+                 resource.data.likes.toSet().difference(request.resource.data.likes.toSet())).hasOnly([request.auth.uid]))
+          || (onlyChanged(['comments']) && request.resource.data.comments == resource.data.comments + 1));
+      allow delete: if signedIn() && resource.data.uid == request.auth.uid;
+      match /comments/{cid} {
+        allow read: if true;
+        allow create: if signedIn() && request.resource.data.uid == request.auth.uid && shortText(request.resource.data.text, 500);
+        allow delete: if signedIn() && resource.data.uid == request.auth.uid;
+      }
+    }
+
+    match /clubs/{teamId} {
+      allow read: if true;
+      allow create, update: if signedIn() && request.resource.data.keys().hasOnly(['name', 'logo', 'lg', 'members']);
+      match /members/{uid} {
+        allow read: if true;
+        allow write: if isMe(uid);
+      }
+    }
+
+    match /chats/{matchId}/msgs/{id} {
+      allow read: if true;
+      allow create: if signedIn() && request.resource.data.uid == request.auth.uid && shortText(request.resource.data.text, 300);
+    }
+
+    match /predictions/{id} {
+      allow read: if true;
+      allow create, update: if signedIn() && request.resource.data.uid == request.auth.uid
+        && id == request.resource.data.matchId + '_' + request.auth.uid
+        && request.resource.data.kickoff > request.time.toMillis()
+        && request.resource.data.h is int && request.resource.data.a is int
+        && request.resource.data.h >= 0 && request.resource.data.h <= 15 && request.resource.data.a >= 0 && request.resource.data.a <= 15;
+    }
+
+    match /games/{id} {
+      allow read: if true;
+      allow create: if signedIn() && request.resource.data.uid == request.auth.uid;
+      allow update: if signedIn() && (resource.data.uid == request.auth.uid || onlyChanged(['players']));
+      allow delete: if signedIn() && resource.data.uid == request.auth.uid;
+      match /msgs/{mid} {
+        allow read: if true;
+        allow create: if signedIn() && request.resource.data.uid == request.auth.uid && shortText(request.resource.data.text, 300);
+      }
+    }
+
+    match /turfs/{id} {
+      allow read: if true;
+      allow create: if signedIn() && request.resource.data.ownerId == request.auth.uid;
+      allow update: if signedIn() && resource.data.ownerId == request.auth.uid && request.resource.data.ownerId == resource.data.ownerId;
+      allow delete: if signedIn() && resource.data.ownerId == request.auth.uid;
+    }
+
+    // public slot grid: who booked is not exposed beyond a user id
+    match /slots/{id} {
+      allow read: if true;
+      allow create: if signedIn() && request.resource.data.userId == request.auth.uid
+        && get(/databases/$(database)/documents/turfs/$(request.resource.data.turfId)).data.ownerId == request.resource.data.ownerId
+        && id == request.resource.data.turfId + '_' + request.resource.data.date + '_' + request.resource.data.slot
+        && (request.resource.data.status in ['pending', 'confirmed'] || (request.resource.data.status == 'blocked' && request.auth.uid == request.resource.data.ownerId))
+        && (request.resource.data.status != 'confirmed' || get(/databases/$(database)/documents/turfs/$(request.resource.data.turfId)).data.instant == true || request.auth.uid == request.resource.data.ownerId);
+      allow update: if signedIn() && (
+          resource.data.ownerId == request.auth.uid
+          || (resource.data.userId == request.auth.uid && request.resource.data.status == 'cancelled' && onlyChanged(['status']))
+          || (resource.data.status in ['cancelled', 'declined'] && request.resource.data.userId == request.auth.uid
+              && request.resource.data.ownerId == resource.data.ownerId && request.resource.data.status in ['pending', 'confirmed']
+              && (request.resource.data.status != 'confirmed' || get(/databases/$(database)/documents/turfs/$(resource.data.turfId)).data.instant == true)));
+      allow delete: if signedIn() && resource.data.ownerId == request.auth.uid;
+    }
+
+    // booking details (phone, note): only the player who booked and the turf owner
+    match /bookings/{id} {
+      allow read: if signedIn() && (resource.data.userId == request.auth.uid || resource.data.ownerId == request.auth.uid);
+      allow create: if signedIn() && request.resource.data.userId == request.auth.uid
+        && get(/databases/$(database)/documents/turfs/$(request.resource.data.turfId)).data.ownerId == request.resource.data.ownerId;
+      allow update: if signedIn() && (
+          resource.data.ownerId == request.auth.uid
+          || (resource.data.userId == request.auth.uid && request.resource.data.status == 'cancelled' && onlyChanged(['status']))
+          || (resource.data.status in ['cancelled', 'declined'] && request.resource.data.userId == request.auth.uid
+              && request.resource.data.ownerId == resource.data.ownerId));
+      allow delete: if signedIn() && resource.data.ownerId == request.auth.uid;
+    }
+  }
+}
